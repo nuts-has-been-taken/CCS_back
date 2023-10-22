@@ -1,0 +1,46 @@
+version: "3.4"
+services:
+  ccs_front:
+    image: ccs_front
+    container_name: ccs_front
+    build:
+      context: ./CCS_front
+    environment:
+      REACT_APP_BACKEND_URL: http://127.0.0.1:8002
+    command: "npm start"
+    ports:
+      - "3000:3000" 
+    networks:
+      - mynetwork
+
+  ccs_back:
+    image: ccs_back
+    container_name: ccs_back
+    build:
+      context: ./CCS_back
+    environment:
+      MINIO_URL: minio:9000
+      MINIO_ACCESS_KEY: tedisbest
+      MINIO_SECRET_KEY: tedisbest
+    command: "python3 main.py"
+    ports:
+      - "8002:8002"
+    networks:
+      - mynetwork
+
+  minio:
+    image: "quay.io/minio/minio:RELEASE.2023-10-16T04-13-43Z"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - "./minio/data1:/data1"
+      - "./minio/data2:/data2"
+    command: server --console-address ":9001" http://minio/data{1...2}
+    environment:
+      - MINIO_ROOT_USER=tedisbest
+      - MINIO_ROOT_PASSWORD=tedisbest
+    networks:
+      - mynetwork
+networks:
+  mynetwork:
